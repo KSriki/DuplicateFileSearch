@@ -13,28 +13,30 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Application {
-	
+
 	static HashMap<String, ArrayList<String>> dupes = new HashMap<String,ArrayList<String>>();
 	public void walk ( String path ){
 		File root = new File(path);
 		File[] list = root.listFiles();
-		
+
 		if (list==null) return;
-		
+
 		for (File f : list){
 			if (f.isDirectory()){
 				walk(f.getAbsolutePath());
-//				System.out.println("Dir: " + f.getAbsoluteFile() );
+				//				System.out.println("Dir: " + f.getAbsoluteFile() );
 			}else{
 				if(f.exists()){
-//					Pattern pattern = Pattern.compile(regex);
+					//					Pattern pattern = Pattern.compile(regex);
 					//	Matcher matcher = pattern.matcher(f.getName());
-						
+
 					//	while (matcher.find()) {
-						//Use MD5 algorithm
-						MessageDigest md5Digest;
-						String checksum;
-						
+					//Use MD5 algorithm
+					MessageDigest md5Digest;
+					String checksum;
+
+					//MD5 hash
+					/*
 						try {
 							md5Digest = MessageDigest.getInstance("MD5");
 							checksum = getFileChecksum(md5Digest, f);
@@ -54,29 +56,29 @@ public class Application {
 							e.printStackTrace();
 						}
 
-						//Use SHA-1 algorithm
-						MessageDigest shaDigest;
-						try {
-							shaDigest = MessageDigest.getInstance("SHA-1");
-						} catch (NoSuchAlgorithmException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+					 */
+					//Use SHA-1 algorithm
+					MessageDigest shaDigest;
+					try {
+						shaDigest = MessageDigest.getInstance("SHA-1");
 
-						/*
-				 //SHA-1 checksum 
-				 try {
-				 String shaChecksum = getFileChecksum(shaDigest, file);
-				 } catch (IOException e) {
-				 // TODO Auto-generated catch block
-				 e.printStackTrace();
-				 }
-						 */
-							//System.out.println("File: "+ f.getAbsoluteFile());
-							
-						//}
-						
-						
+						String shaChecksum = getFileChecksum(shaDigest, f);
+						if(dupes.get(shaChecksum) != null){
+							dupes.get(shaChecksum).add(f.getName());
+						}
+						else{
+							ArrayList<String> temp = new ArrayList<String>();
+							temp.add(f.getName());
+							dupes.put(shaChecksum, temp);
+						}
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					catch (NoSuchAlgorithmException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
 				}
 			}
@@ -91,21 +93,21 @@ public class Application {
 		System.out.println("Enter directory to search: ");
 		String dir = console.nextLine();
 		filewalker.walk(dir);
-		
-		
+
+
 		for(Map.Entry<String, ArrayList<String>> entry: dupes.entrySet()){
 			if(entry.getValue().size() > 1){
-				
+
 				System.out.printf("For %s, the dupe files are: ",entry.getKey());
 				ArrayList<String> dupeFiles = entry.getValue();
 				for(int i = 0; i < dupeFiles.size();i++){
-					System.out.printf(dupeFiles.get(i));
+					System.out.printf("%s ",dupeFiles.get(i));
 				}
 				System.out.println("");
 			}
 		}
-		
-		
+
+
 	}
 
 	private static String getFileChecksum(MessageDigest digest, File file) throws IOException
